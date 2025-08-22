@@ -90,7 +90,7 @@ run <- lapply(1:length(d), function(i){
     compute_subgroup_effects(
       n_groups = 8,
       cate_truth = cate_truth,
-      icate = icate_fit2,
+      icate = icate_fit3,
       dat = dat,
       model = 'bcf'
     ),
@@ -105,7 +105,7 @@ run <- lapply(1:length(d), function(i){
   )
   
   # keep track of iteration and d for book keeping 
-  subgroup_effects$iter <- i
+  subgroup_effects$iter <- iter
   subgroup_effects$d <- d[i]
   
   list(subgroup = subgroup_effects, icate = icate)
