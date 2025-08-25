@@ -19,7 +19,7 @@ for (i in 1:8) {
 
 x_mat <- apply(x_mat, 2, as.double)
 # grid of subgroup effect sizes
-d <- seq(0, 1.5, .1) 
+d <- seq(0.1, 1.5, .1) 
 
 run <- lapply(1:length(d), function(i){
   set.seed(2)
