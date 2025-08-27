@@ -56,18 +56,22 @@ run <- lapply(1:length(d), function(i){
   fit2 <- dbarts::bart2(y ~ z + as.factor(x), data = dat, test = test_df)
   fit3 <- stochtree::bcf(X_train = x_mat, Z_train = z, y_train = y, num_mcmc = 1000)
   fit4 <- rstanarm::stan_glm(y ~ z*as.factor(x), data = dat)
+  fit5 <- stan4bart::stan4bart(y ~ bart(z + as.factor(x)) + (1 + z|as.factor(x)), data = dat, test = test_dat)
   
   # extract icate (we'll need this for SVD)
   icate_fit1 <- compute_icate(fit1, test = test_df)
   icate_fit2 <- compute_icate(fit2, test = test_df)
   icate_fit3 <- compute_icate(fit3)
   icate_fit4 <- compute_icate(fit4, test = test_df)
+  icate_fit5 <- compute_icate(fit5, test = test_df)
+  
   
   # save as a list for later
   icate <- list(mlm_icate = icate_fit1, 
                 BART_icate = icate_fit2, 
                 bcf_icate = icate_fit3, 
-                lm_icate = icate_fit4)
+                lm_icate = icate_fit4, 
+                s4b = icate_fit5)
   
   # extract statistics
   subgroup_effects <- rbind(
@@ -101,23 +105,26 @@ run <- lapply(1:length(d), function(i){
       icate = icate_fit4,
       dat = dat,
       model = 'lm'
+    ), 
+    
+    compute_subgroup_effects(
+      n_groups = 8,
+      cate_truth = cate_truth,
+      icate = icate_fit5,
+      dat = dat,
+      model = 'stan4bart'
     )
   )
   
   # keep track of iteration and d for book keeping 
   subgroup_effects$iter <- iter
   subgroup_effects$d <- d[i]
-  
-  list(subgroup = subgroup_effects, icate = icate)
-  
+  subgroup_effects
+
 })
 
 
-export_subgroups <- do.call('rbind', lapply(run, '[[', 1))
-export_icates <- lapply(run, '[[', 2)
+export_subgroups <- do.call('rbind', run)
 
 path <- paste0('./results/subgroups_dgp1_study1/results', iter, '.csv')
 readr::write_csv(export_subgroups, path)
-
-path <- paste0('./results/icates_dgp1_study1/results', iter, '.rds')
-readr::write_rds(export_icates, path)
