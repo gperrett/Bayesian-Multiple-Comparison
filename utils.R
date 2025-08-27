@@ -6,13 +6,20 @@ compute_icate <- function(fit, test = NULL){
   
   if(class(fit)[1] == 'bcfmodel'){
     return(t(fit$tau_hat_train)) # transpose becuase stochtree index is different
+
   }
   
   if(class(fit)[1] == 'stanreg'){
     post <- rstanarm::posterior_epred(fit, newdata = test)
   }
   
-  post[, 1:(nrow(test)/2)] - post[, ((nrow(test)/2)+1):nrow(test)]
+  if(class(fit)[1] == 'stan4bartFit'){
+    post <- t(stan4bart:::extract.stan4bartFit(fit, 'ev', 'test'))
+  }
+  
+   post[, 1:(nrow(test)/2)] - post[, ((nrow(test)/2)+1):nrow(test)]
+  
+  
   
 }
 
