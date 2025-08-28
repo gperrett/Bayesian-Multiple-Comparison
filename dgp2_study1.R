@@ -62,6 +62,8 @@ run <- lapply(1:length(d), function(i){
   icate_fit2 <- compute_icate(fit2, test = test_df)
   icate_fit3 <- compute_icate(fit3)
   icate_fit4 <- compute_icate(fit4, test = test_df)
+  icate_fit5 <- compute_icate(fit5, test = test_df)
+
   
   # save as a list for later
   icate <- list(mlm_icate = icate_fit1, 
@@ -101,6 +103,13 @@ run <- lapply(1:length(d), function(i){
       icate = icate_fit4,
       dat = dat,
       model = 'lm'
+    ), 
+     compute_subgroup_effects(
+      n_groups = 8,
+      cate_truth = cate_truth,
+      icate = icate_fit5,
+      dat = dat,
+      model = 'stan4bart'
     )
   )
   
