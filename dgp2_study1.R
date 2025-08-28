@@ -56,6 +56,12 @@ run <- lapply(1:length(d), function(i){
   fit2 <- dbarts::bart2(y ~ z + as.factor(x), data = dat, test = test_df)
   fit3 <- stochtree::bcf(X_train = x_mat, Z_train = z, y_train = y, num_mcmc = 1000)
   fit4 <- rstanarm::stan_glm(y ~ z*as.factor(x), data = dat)
+  s4b_dat <- dat
+  s4b_test <- test_df
+  s4b_test$x <- as.factor(test_df$x)
+  s4b_dat$x <- as.factor(s4b_dat$x)
+  fit5 <- stan4bart::stan4bart(y ~ bart(z + x) + (1 + z|x), data = s4b_dat, test = s4b_test)
+  
   
   # extract icate (we'll need this for SVD)
   icate_fit1 <- compute_icate(fit1, test = test_df)
@@ -116,17 +122,12 @@ run <- lapply(1:length(d), function(i){
   # keep track of iteration and d for book keeping 
   subgroup_effects$iter <- iter
   subgroup_effects$d <- d[i]
-  
-  list(subgroup = subgroup_effects, icate = icate)
+  subgroup_effects
   
 })
 
 
-export_subgroups <- do.call('rbind', lapply(run, '[[', 1))
-export_icates <- lapply(run, '[[', 2)
+export_subgroups <- do.call('rbind', run)
 
 path <- paste0('./results/subgroups_dgp2_study1/results', iter, '.csv')
 readr::write_csv(export_subgroups, path)
-
-path <- paste0('./results/icates_dgp2_study1/results', iter, '.rds')
-readr::write_rds(export_icates, path)
